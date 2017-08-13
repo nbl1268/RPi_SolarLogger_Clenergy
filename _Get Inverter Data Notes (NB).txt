@@ -1,0 +1,132 @@
+Login to Pi@192.168.42.27
+UN Pi
+PW Raspberry
+
+Main files for powercom logger are in the folder /home/pi/Desktop/PowerComCode
+
+cd ~/Desktop/PowerComCode
+perl powercom_poll.pl
+
+Result
+	Inverter Serial Number: 10033761102
+	Ignoring line: ok: logged in
+
+	Ignoring line: Read registers:
+
+	Accumulated Energy: 2492
+	Working Hours: 528.2
+
+
+The powercom.db file and related 'processed' files are located in the folder /home/pi/.powercom
+NOTE: review removal of these after x days...
+
+
+
+To use shell script 'run_powercom.sh' which calls 'Perl powercom_poll.pl'
+	sudo chmod +x run_powercom.sh
+to test
+	sh run_powercom.sh
+
+now set up CRON job to run every minute
+schedule program to run every minute
+	crontab -e
+
+add this line
+	* * * * * /home/pi/Desktop/PowerComCode/run_powercom.sh > /dev/null 2>&1
+
+
+You can see output stats in the sqlite database by doing:
+
+	cd ~/.powercom
+	sqlite3 powercom.db
+	select * from readings;
+
+you can clear older data by
+	DELETE from readings where reading_datetime < '2016-10-31 00:00:00'
+	Note: replace date with your own value
+
+You can exit sqlite by typing:
+	.quit
+
+
+SAMBA
+Make folder accessible
+	chown -R root:users /home/pi/Desktop/PowerComCode/
+	chmod -R ug+rwx,o+rx-w /home/pi/Desktop/PowerComCode/
+
+At the end of the file /etc/samba/smb.conf add the following lines:
+	sudo nano /etc/samba/smb.conf
+
+	[pi]
+	   path = /home/pi/Desktop/PowerComCode/
+	   force group = users
+	   create mask = 0660
+	   directory mask = 0771
+	   browsable =yes
+	   writable = yes
+	   guest ok = yes
+
+
+
+Remove unwanted 'processed' files after x days [just those less than 300 bytes (eg no data)]
+use FIND command in Crontab
+
+	find /path/to/files* -mtime +5 -size -300 -exec rm {} \;
+	(Note that there are spaces between rm, {}, and \;)
+
+Explanation
+    The first argument is the path to the files. This can be a path, a directory, or a wildcard as in the example above. 
+    I would recommend using the full path, and make sure that you run the command without the exec rm to make sure you are getting the right results.
+
+    The second argument, -mtime, is used to specify the number of days old that the file is. If you enter +5, it will find files older than 5 days.
+    The third argument, -size, is used to specify the filesize. If you enter -300, it will find files less than 300 bytes
+    The forth argument, -exec, allows you to pass in a command such as rm. 
+    The {} \; at the end is required to end the command.
+
+Create shell script 'run_finddeleteprocessed.sh'
+	
+	/usr/bin/find /home/pi/.powercom/processed/ -type f -mtime +7 -size -300c -delete ;
+
+Allow to execute
+	sudo chmod +x run_finddeleteprocessed.sh
+to test
+	sh run_finddeleteprocessed.sh
+
+now set up CRON job to run every minute
+schedule program to run every minute
+	crontab -e
+
+add this line
+0 0 * * * /home/pi/Desktop/PowerComCode/run_finddeleteprocessed.sh > /dev/null 2>&1
+
+
+STATS
+cd ~/Desktop/PowerComCode/powercom
+	sudo chmod +x powercom_daily.pl
+	sudo chmod +x powercom_monthly.pl
+	perl powercom_daily.pl
+	perl powercom_monthly.pl
+
+
+cd ~/Desktop/PowerComCode
+
+To use shell script 'run_powercom_daily.sh' which calls 'perl powercom_daily.pl'
+	sudo chmod +x run_powercom_daily.sh
+to test
+	sh run_powercom_daily.sh
+
+To use shell script 'run_powercom_monthly.sh' which calls 'perl powercom_monthly.pl'
+	sudo chmod +x run_powercom_monthly.sh
+to test
+	sh run_powercom_monthly.sh
+
+
+now set up CRON job to run every minute
+schedule program to run every minute
+	crontab -l 	view
+	crontab -e	edit
+
+add this line
+	*/5 * * * * /home/pi/Desktop/PowerComCode/run_powercom_daily.sh > /dev/null 2>&1
+	*/5 * * * * /home/pi/Desktop/PowerComCode/run_powercom_monthly.sh > /dev/null 2>&1
+

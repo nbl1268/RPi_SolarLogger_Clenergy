@@ -1,0 +1,32 @@
+========================
+version 1.1 - 2014-09-23
+========================
+
+- New configs for the graph's min and max hour.
+  The previous method of calculating the min & max per day
+  meant that the start & end of the graph represented a different
+  time for each day's readings, making it hard to compare across days
+
+- Changed calculation of X position in graph to use a 'minutes past earliest'
+  concept - the earliest being a config option
+
+- Render graphs with a Cairo gradient - looks much nicer
+
+- Added vertical and horizontal lines from each X & Y axis label
+
+- Fixed position of X & Y axis labels
+
+- Summary and details datasheets are now next to each other - they don't
+  take up much horizontal space. Added a vertical pane to hold these 2
+  datasheets
+
+- Added a horizontal pane to hold the graphs and datasheets
+
+- Started decimal place formatting in datasheets - this has exposed
+  some bugs :/
+
+=============================
+version 1.0 - initial release
+=============================
+
+- everything

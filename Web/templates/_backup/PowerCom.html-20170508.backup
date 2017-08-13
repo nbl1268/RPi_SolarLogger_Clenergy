@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>   
+  <meta charset="utf-8" />   
+   <title>Solar Inverter {{title}} Data</title>      
+
+   <!-- import plugin script -->   
+   <script type='application/javascript'  src='static/Chart.min.js'> </script>
+   <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+   <script type='application/javascript'>
+   var reloading;
+   var reloadtime = 60000;
+
+
+   function get_radio_value() {
+     var inputs = document.getElementsByName("reload");
+     for (var i = 0; i < inputs.length; i++) {
+       if (inputs[i].checked) {
+         return inputs[i].value;
+       }
+     }
+   }
+
+   function SetReloadTime() {
+     reloadtime = get_radio_value() * 60000;
+     if (isNaN(reloadtime)) {
+     // force default
+     SetDefaultRadioButton();
+     }
+   }
+
+   function SetDefaultRadioButton() {
+     document.getElementById('radio_5').checked = true;
+   }
+
+   function SetAutoRefresh() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     var autoReload = document.getElementById("reloadCB").checked;
+     if (autoReload) {
+       window.location.replace("#autoreload");
+       reloading=setTimeout("window.location.reload();", reloadtime);
+     } else {
+       window.location.replace("#");
+       clearTimeout(reloading);
+     }
+   }
+
+   function checkReloading() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     if (window.location.hash=="#autoreload") {
+       reloading=setTimeout("window.location.reload();", reloadtime);
+       document.getElementById("reloadCB").checked=true;
+     }
+   }
+
+   window.onload=checkReloading;
+
+   </script>
+ </head>
+
+ <body>
+   <h1>Solar Inverter {{title}} Data</h1>
+   Readings <a href="/solar">Now</a>&nbsp;&nbsp;&nbsp;Charts <a href="/solar_day">Today</a>&nbsp;&nbsp;&nbsp;<a href="/solar_daily">Daily</a>&nbsp;&nbsp;&nbsp;<a href="/solar_monthly">Monthly</a>
+   <BR>
+   <script>
+   // Show table of data from table%
+   // record passed in contains
+   //   reading_datetime, 
+   //   heat_sink_temperature, 
+   //   panel_1_voltage, 
+   //   panel_1_dc_voltage, 
+   //   working_hours, 
+   //   line_current, 
+   //   line_voltage, 
+   //   ac_frequency, 
+   //   ac_power, 
+   //   accumulated_energy
+   </script>
+
+   <form id="ResultRange_Select" action = "/solar" method="GET">
+     <input type="radio" name="range_h" value="10" id="range_10" /><label for="range_10">10 Records</label>
+     <input type="radio" name="range_h" value="20" id="range_20" /><label for="range_20">20 Records</label>
+     <input type="radio" name="range_h" value="30" id="range_30" /><label for="range_30">30 Records</label>
+     <input type="radio" name="range_h" value="60" id="range_60" /><label for="range_60">60 Records</label>
+   </form>
+   <br>
+   <!-- // show the arr_table data if there is data -->
+   <table border="1">
+   {% if (label) %}
+     <tr>
+     {% for row in label %}
+       <th align="center"> {{ row }}</th>
+     {% endfor %}
+     </tr>
+     {% for row in value %}
+        <tr>
+        {% for column in row %}
+            <td align="center"> {{ column }}</td>
+        {% endfor %}
+        </tr>
+     {% endfor %}
+     </tr>
+   {% else %}
+      <h1>No Data Found !!</h1>
+   {% endif %}
+   </table>
+
+   <br>
+   <form id="AutoRefresh_select" onclick="SetAutoRefresh(this);">  
+     Auto Refresh: 
+     <input type="checkbox" onclick="SetAutoRefresh(this);" id="reloadCB">
+     Interval: 
+     <input type="radio" name="reload" value="1"  id="radio_1" /> <label for="radio_1" >1 min</label>
+     <input type="radio" name="reload" value="5"  id="radio_5" /> <label for="radio_5" >5 min</label>
+     <input type="radio" name="reload" value="10" id="radio_10" /><label for="radio_10">10 min</label>
+     <input type="radio" name="reload" value="20" id="radio_20" /><label for="radio_20">20 min</label>
+     <input type="radio" name="reload" value="30" id="radio_30" /><label for="radio_30">30 min</label>
+     <input type="radio" name="reload" value="60" id="radio_60" /><label for="radio_60">1 hour</label>
+   </form>
+
+   Page Last Updated: <span id="loadTime"></span>
+   <script type='application/javascript'>
+     document.getElementById('loadTime').innerHTML = new Date().toLocaleString();
+   </script>
+
+ </body>
+ <script>
+
+   jQuery("#ResultRange_Select input[type=radio]").click(function(){
+//     timezone = jstz.determine();
+//     jQuery(".timezone").val(timezone.name()); 
+     jQuery("#ResultRange_Select").submit();
+   });
+
+ </script>
+</html>
+

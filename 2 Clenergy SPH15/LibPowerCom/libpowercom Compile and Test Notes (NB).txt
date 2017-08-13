@@ -1,0 +1,47 @@
+
+
+LibPowerCom C++ code
+Place in folder
+
+Make use that 'libpthread' is installed
+(use sudo apt-get install libpthread-stubs0-dev)
+
+If existing, remove the '*.o' files
+
+To do install (if admin - if not add SUDO in front)
+	MAKE
+then
+	MAKE Install
+
+once installed succesfully.
+use this to execute the test program
+	 ./powercom-test
+	 ./powercom-test > result.txt		(capture to file)
+	 ./powercom-test >> result.txt		(capture and append to file)
+
+
+Result should look like this.
+
+	Read registers:
+	Register 0: 250
+	Register 1: 1873
+	Register 2: 0
+	Register 3: 0
+	Register 4: 5163
+	Register 5: 1
+	Register 6: 0
+	Register 7: 0
+	Register 8: 0
+	Register 9: 0
+	Register 10: 0
+	Register 11: 1
+	Register 12: 2353
+	Register 13: 5000
+	Register 14: 13
+	Register 15: 0
+	Register 16: 0
+	Register 17: 24196
+	Register 18: 0
+	Register 19: 0
+	Register 20: 0
+

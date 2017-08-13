@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>   
+  <meta charset="utf-8" />   
+   <title>Solar Inverter {{title}} Data</title>      
+
+   <!-- import plugin script -->   
+   <script type='application/javascript'  src='static/Chart.min.js'> </script>
+   <script type='application/javascript'  src='static/jquery-1.8.2.min.js'></script>
+   <script type='application/javascript'  src='static/raphael-2.1.4.min.js'></script>
+   <script type='application/javascript'  src='static/justgage-1.2.9.min.js'></script>
+
+   <script type='application/javascript'>
+   var reloading;
+   var reloadtime = 60000;
+
+   function get_radio_value() {
+     var inputs = document.getElementsByName("reload");
+     for (var i = 0; i < inputs.length; i++) {
+       if (inputs[i].checked) {
+         return inputs[i].value;
+       }
+     }
+   }
+
+   function SetReloadTime() {
+     reloadtime = get_radio_value() * 60000;
+     if (isNaN(reloadtime)) {
+     // force default
+     SetDefaultRadioButton();
+     }
+   }
+
+   function SetDefaultRadioButton() {
+     document.getElementById('radio_5').checked = true;
+   }
+
+   function SetAutoRefresh() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     var autoReload = document.getElementById("reloadCB").checked;
+     if (autoReload) {
+       window.location.replace("#autoreload");
+       reloading=setTimeout("window.location.reload();", reloadtime);
+     } else {
+       window.location.replace("#");
+       clearTimeout(reloading);
+     }
+   }
+
+   function checkReloading() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     if (window.location.hash=="#autoreload") {
+       reloading=setTimeout("window.location.reload();", reloadtime);
+       document.getElementById("reloadCB").checked=true;
+     }
+   }
+
+   window.onload=checkReloading;
+   </script>
+
+   <style>
+     .equalDivide tr td { width:14%; min-width:50px; }
+   </style>
+   <link rel="icon" type="image/png" href="/static/images/favicon.png">
+ </head>
+
+ <body>
+   <h1>Solar Inverter {{title}} Data</h1>
+   Readings <a href="/solar">Now</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Charts <a href="/solar_day">Today</a>&nbsp;&nbsp;&nbsp;<a href="/solar_daily">Daily</a>&nbsp;&nbsp;&nbsp;<a href="/solar_monthly">Monthly</a>
+   <BR>
+   <script>
+   // Show table of data from table%
+   // record passed in contains
+   //   reading_datetime, 
+   //   heat_sink_temperature, 
+   //   panel_1_voltage, 
+   //   panel_1_dc_voltage, 
+   //   working_hours, 
+   //   line_current, 
+   //   line_voltage, 
+   //   ac_frequency, 
+   //   ac_power, 
+   //   accumulated_energy
+   </script>
+
+   <br>
+   <!-- // show the instantaneoud values via gauges -->
+   <table class="equalDivide" border="0" cellpadding="0" cellspacing="0" width="100%">
+     <tr>
+       <td id="gauge_HeatSinkTemp"></td>
+       <td id="gauge_PanelVoltage"></td>
+       <td id="gauge_PanelCurrent"></td>
+       <td id="gauge_LineVoltage"></td>
+       <td id="gauge_LineCurrent"></td>
+       <td id="gauge_LineFrequency"></td>
+       <td id="gauge_LinePower"></td>
+     </tr>
+   </table>
+   <br>
+
+   <!-- // Allow user to select the data range shown in the table -->
+   <form id="ResultRange_Select" action = "/solar" method="GET">
+     <input type="radio" name="range_h" value="10" id="range_10" /><label for="range_10">10 Records</label>
+     <input type="radio" name="range_h" value="20" id="range_20" /><label for="range_20">20 Records</label>
+     <input type="radio" name="range_h" value="30" id="range_30" /><label for="range_30">30 Records</label>
+     <input type="radio" name="range_h" value="60" id="range_60" /><label for="range_60">60 Records</label>
+   </form>
+
+   <!-- // show the arr_table data if there is data -->
+   <table id = "MyData" border="1" class="equalDivide" width="100%">
+   {% if (label) %}
+     <tr>
+     {% for row in label %}
+       <th align="center"> {{ row }}</th>
+     {% endfor %}
+     </tr>
+     {% for row in value %}
+        <tr>
+        {% for column in row %}
+            <td align="center"> {{ column }}</td>
+        {% endfor %}
+        </tr>
+     {% endfor %}
+     </tr>
+   {% else %}
+      <h1>No Data Found !!</h1>
+   {% endif %}
+   </table>
+   <br>
+
+   <!-- // Allow the user to set auto refresh and interval for this form -->
+   <form id="AutoRefresh_select" onclick="SetAutoRefresh(this);">  
+     Auto Refresh: 
+     <input type="checkbox" onclick="SetAutoRefresh(this);" id="reloadCB">
+     Interval: 
+     <input type="radio" name="reload" value="1"  id="radio_1" /> <label for="radio_1" >1 min</label>
+     <input type="radio" name="reload" value="5"  id="radio_5" /> <label for="radio_5" >5 min</label>
+     <input type="radio" name="reload" value="10" id="radio_10" /><label for="radio_10">10 min</label>
+     <input type="radio" name="reload" value="20" id="radio_20" /><label for="radio_20">20 min</label>
+     <input type="radio" name="reload" value="30" id="radio_30" /><label for="radio_30">30 min</label>
+     <input type="radio" name="reload" value="60" id="radio_60" /><label for="radio_60">1 hour</label>
+   </form>
+
+   Page Last Updated: <span id="loadTime"></span>
+   <script type='application/javascript'>
+     document.getElementById('loadTime').innerHTML = new Date().toLocaleString();
+   </script>
+ </body>
+
+  <script type="text/javascript">
+//   try {
+// this works...throws alert (msgbox) to user with table row details
+//     alert(document.getElementById("MyData").rows.item(1).innerHTML);
+//     alert(document.getElementById("MyData").rows[1].cells.item(1).innerHTML);
+//  }
+
+//   catch(err) {
+//     //message.innerHTML = "Input " + err;
+//   }
+
+//   finally {
+//     //document.body.style.cursor='default';
+//   }
+
+   try {
+     if (document.getElementById("MyData").rows.length >2)
+     {
+       var g = new JustGage({
+         id: "gauge_HeatSinkTemp",
+         label: "Heat Sink Temp",
+         value: document.getElementById("MyData").rows[1].cells.item(1).innerHTML,
+         min: 0,
+         max: 80,
+         relativeGaugeSize: true,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         customSectors: {
+           percents: false,
+           ranges: [{
+             color : "#43bf58",
+             lo : 0,
+             hi : 20
+           },{
+             color : "#ff3b30",
+             lo : 51,
+             hi : 100
+           }]
+         }
+       });
+
+       var g = new JustGage({
+         id: "gauge_PanelVoltage",
+         label: "Panel Voltage",
+         value: document.getElementById("MyData").rows[1].cells.item(2).innerHTML,
+         min: 70,
+         max: 260,
+         relativeGaugeSize: true,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true
+       });
+
+       var g = new JustGage({
+         id: "gauge_PanelCurrent",
+         label: "Panel Current",
+         value: document.getElementById("MyData").rows[1].cells.item(3).innerHTML,
+         min: 0,
+         max: 10,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         relativeGaugeSize: true
+       });
+
+       var g = new JustGage({
+         id: "gauge_LineVoltage",
+         label: "Line Voltage",
+         value: document.getElementById("MyData").rows[1].cells.item(6).innerHTML,
+         min: 220,
+         max: 260,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         relativeGaugeSize: true,
+         customSectors: {
+           percents: true,
+           ranges: [{
+             color : "#43bf58",
+             lo : 0,
+             hi : 80
+           },{
+             color : "#ff3b30",
+             lo : 81,
+             hi : 100
+           }]
+         }
+       });
+
+      var g = new JustGage({
+         id: "gauge_LineCurrent",
+         label: "Line Current",
+         value: document.getElementById("MyData").rows[1].cells.item(5).innerHTML,
+         min: 0,
+         max: 10,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         relativeGaugeSize: true
+       });
+
+      var g = new JustGage({
+         id: "gauge_LineFrequency",
+         label: "Line Frequency",
+         value: document.getElementById("MyData").rows[1].cells.item(7).innerHTML,
+         min: 49,
+         max: 51,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         relativeGaugeSize: true
+       });
+
+      var g = new JustGage({
+         id: "gauge_LinePower",
+         label: "Line Power",
+         value: document.getElementById("MyData").rows[1].cells.item(8).innerHTML,
+         min: 0,
+         max: 1600,
+         gaugeWidthScale: 0.6,
+         pointer: true,
+         formatNumber: true,
+         relativeGaugeSize: true
+       });
+     }
+   }
+   catch(err) {
+     //message.innerHTML = "Input " + err;
+   }
+
+   finally {
+     //document.body.style.cursor='default';
+   }
+ </script>
+
+ <script>
+   jQuery("#ResultRange_Select input[type=radio]").click(function(){
+     jQuery("#ResultRange_Select").submit();
+   });
+ </script>
+</html>
+

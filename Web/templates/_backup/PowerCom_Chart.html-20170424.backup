@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>   
+  <meta charset="utf-8" />   
+   <title>Solar Inverter {{title}} Data</title>      
+
+   <!-- import plugin script -->   
+   <script type='application/javascript'  src='static/Chart.min.js'> </script>
+   <script type='application/javascript'>
+   var reloading;
+   var reloadtime = 60000;
+   var sTitle =  document.title;
+
+   function get_radio_value() {
+     var inputs = document.getElementsByName("reload");
+     for (var i = 0; i < inputs.length; i++) {
+       if (inputs[i].checked) {
+         return inputs[i].value;
+       }
+     }
+   }
+
+   function SetReloadTime() {
+     reloadtime = get_radio_value() * 60000;
+     if (isNaN(reloadtime)) {
+     // force default
+     SetDefaultRadioButton();
+//       reloadtime = 5 * 60000;
+//       document.getElementById('radio_5').checked = true;
+     }
+   }
+
+   function SetDefaultRadioButton() {
+     switch(document.title) {
+       case 'Solar Inverter Current Day Data':
+         document.getElementById('radio_10').checked = true;
+         break;
+
+       case 'Solar Inverter Daily Data':
+         document.getElementById('radio_30').checked = true;
+         break;
+
+       case 'Solar Inverter Monthly Data':
+         document.getElementById('radio_60').checked = true;
+         break;
+
+       default:
+       document.getElementById('radio_30').checked = true;
+    }
+   }
+
+   function SetAutoRefresh() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     var autoReload = document.getElementById("reloadCB").checked;
+     if (autoReload) {
+       window.location.replace("#autoreload");
+       reloading=setTimeout("window.location.reload();", reloadtime);
+     } else {
+       window.location.replace("#");
+       clearTimeout(reloading);
+     }
+   }
+
+   function checkReloading() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     if (window.location.hash=="#autoreload") {
+       reloading=setTimeout("window.location.reload();", reloadtime);
+       document.getElementById("reloadCB").checked=true;
+     }
+   }
+
+   window.onload=checkReloading;
+
+   </script>
+ </head>
+
+ <body>
+   <h1>Solar Inverter {{title}} Data</h1>
+   Readings <a href="/solar">Now</a>&nbsp;&nbsp;&nbsp;Charts <a href="/solar_day">Today</a>&nbsp;&nbsp;&nbsp;<a href="/solar_daily">Daily</a>&nbsp;&nbsp;&nbsp;<a href="/solar_monthly">Monthly</a>
+   <BR>
+  
+   <!-- chart canvas element -->
+   <canvas id="chart1" width="1000" height="300"></canvas>
+   <canvas id="chart2" width="1000" height="300"></canvas>
+  
+   <script type="text/javascript">
+     // Global values
+     var steps = 5	// spacing of vetical graduations
+     var arr_label = [{% for item in labels %}
+                  "{{item}}",
+                {% endfor %}]
+     var arr_value = [{% for item in values %}
+                  {{item}},
+                {% endfor %}]
+     var max = 100	// default vertical max
+     // get max value from data
+     max = Math.max.apply(null,arr_value)
+     var count = arr_value.length
+
+     // chart data
+     var chartData = {
+     labels : [{% for item in labels %}
+                  "{{item}}",
+               {% endfor %}],
+     datasets : [{
+              label: "Watts",
+              fillColor: "rgba(151,187,205,0.2)",
+              strokeColor: "rgba(151,187,205,1)",
+              pointColor: "rgba(151,187,205,1)",
+     data : [{% for item in values %}
+              {{item}},
+             {% endfor %}]
+          }]
+     };
+
+     // BAR / COLUMN CHART
+     var mybarchart = document.getElementById("chart1").getContext("2d");
+     var barOptions = {
+          scaleOverride: true,
+          scaleSteps: steps,
+          scaleStepWidth: Math.ceil(max / steps),
+          scaleStartValue: 0,
+          scaleShowVerticalLines: true,
+          scaleShowGridLines : true,
+          barShowStroke : true,
+          animation : false
+     }
+
+     // draw bar chart
+     new Chart(mybarchart).Bar(chartData, barOptions);
+
+
+     // LINE CHART
+     var mylinechart = document.getElementById("chart2").getContext("2d");
+     var lineOptions = {
+          scaleOverride: true,
+          scaleSteps: steps,
+          scaleStepWidth: Math.ceil(max / steps),
+          scaleStartValue: 0,
+          scaleShowVerticalLines: true,
+          scaleShowGridLines : true,
+          barShowStroke : true,
+          scaleShowLabels: true,
+          animation : false
+     }
+
+     // draw line chart
+     new Chart(mylinechart).Line(chartData, lineOptions);
+
+
+   /// show data in table
+//   var myArray = arr_label
+//   var myTable= "<table><tr><td style='width: 100px; color: red;'>ID#</td>";
+//     myTable+= "<td style='width: 100px; color: red; text-align: right;'>Date</td>";
+//     myTable+="<td style='width: 100px; color: red; text-align: right;'>Value</td></tr>";
+//
+//     myTable+="<tr><td style='width: 100px;                   '>---------------</td>";
+//     myTable+="<td     style='width: 100px; text-align: right;'>---------------</td>";
+//     myTable+="<td     style='width: 100px; text-align: right;'>---------------</td></tr>";
+//
+//   for (var i=0; i<count; i++) {
+//    myTable+="<tr><td style='width: 100px;'>Reading " + i + " is:</td>";
+//    myArray[i] = arr_label[i].toString();
+//    myTable+="<td style='width: 100px; text-align: right;'>" + arr_label[i] + "</td>";
+//    myTable+="<td style='width: 100px; text-align: right;'>" + arr_value[i] + "</td></tr>";
+//   }  
+//   myTable+="</table>";
+//   document.write( myTable);
+
+
+   </script>
+   <br>
+   <form id="AutoRefresh_select" onclick="SetAutoRefresh(this);">  
+     Auto Refresh: 
+     <input type="checkbox" onclick="SetAutoRefresh(this);" id="reloadCB">
+     Interval: 
+     <input type="radio" name="reload" value="1"  id="radio_1" /> <label for="radio_1" >1 min</label>
+     <input type="radio" name="reload" value="5"  id="radio_5" /> <label for="radio_5" >5 min</label>
+     <input type="radio" name="reload" value="10" id="radio_10" /><label for="radio_10">10 min</label>
+     <input type="radio" name="reload" value="20" id="radio_20" /><label for="radio_20">20 min</label>
+     <input type="radio" name="reload" value="30" id="radio_30" /><label for="radio_30">30 min</label>
+     <input type="radio" name="reload" value="60" id="radio_60" /><label for="radio_60">1 hour</label>
+   </form>
+
+   Page Last Updated: <span id="loadTime"></span>
+   <script type='application/javascript'>
+     document.getElementById('loadTime').innerHTML = new Date().toLocaleString();
+   </script>
+
+ </body>
+</html>
+

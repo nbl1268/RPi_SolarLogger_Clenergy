@@ -1,0 +1,8 @@
+	http://192.168.42.27:8000/solar
+
+	python /home/pi/Desktop/PowerComCode/web/PowerCom_Chart.py
+
+or
+
+	cd /home/pi/Desktop/PowerComCode/web/
+	uwsgi --socket 0.0.0.0:8000 --protocol=http -w PowerCom_Chart:app

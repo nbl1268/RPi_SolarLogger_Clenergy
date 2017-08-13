@@ -1,0 +1,172 @@
+pi@RPi-Solar:~/Desktop/PowerComCode $ ./powercom-test
+
+send packet length 11
+send packet[0] = bb
+send packet[1] = bb
+send packet[2] = 1
+send packet[3] = 0
+send packet[4] = 0
+send packet[5] = 1
+send packet[6] = 1
+send packet[7] = 2
+send packet[8] = 0
+send packet[9] = 1
+send packet[10] = 7b
+start writing
+write ok
+in get data
+receiving byte :0xbb 187 (187)
+receiving byte :0xbb 187 (187)
+receiving byte :0x0 0 (0)
+receiving byte :0x1 1 (1)
+receiving byte :0x1 1 (1)
+receiving byte :0x0 0 (0)
+receiving byte :0x1 1 (1)
+receiving byte :0x82 130 (130)
+receiving byte :0x2a 42 (42)
+receiving byte :0x1 1 (1)
+receiving byte :0x8 8 (8)
+receiving byte :0x8 8 (8)
+receiving byte :0x40 64 (64)
+receiving byte :0x0 0 (0)
+receiving byte :0xf 15 (15)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x14 20 (20)
+receiving byte :0x3a 58 (58)
+receiving byte :0x0 0 (0)
+receiving byte :0x1 1 (1)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0xc 12 (12)
+receiving byte :0x9 9 (9)
+receiving byte :0x58 88 (88)
+receiving byte :0x13 19 (19)
+receiving byte :0x7f 127 (127)
+receiving byte :0x1 1 (1)
+receiving byte :0x31 49 (49)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x5e 94 (94)
+receiving byte :0xcc 204 (204)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x0 0 (0)
+receiving byte :0x5 5 (5)
+receiving byte :0x2f 47 (47)
+receiving data done
+answer :
+answer packet[0] = bb
+answer packet[1] = bb
+answer packet[2] = 0
+answer packet[3] = 1
+answer packet[4] = 1
+answer packet[5] = 0
+answer packet[6] = 1
+answer packet[7] = 82
+answer packet[8] = 2a
+answer packet[9] = 1
+answer packet[10] = 8
+answer packet[11] = 8
+answer packet[12] = 40
+answer packet[13] = 0
+answer packet[14] = f
+answer packet[15] = 0
+answer packet[16] = 0
+answer packet[17] = 14
+answer packet[18] = 3a
+answer packet[19] = 0
+answer packet[20] = 1
+answer packet[21] = 0
+answer packet[22] = 0
+answer packet[23] = 0
+answer packet[24] = 0
+answer packet[25] = 0
+answer packet[26] = 0
+answer packet[27] = 0
+answer packet[28] = 0
+answer packet[29] = 0
+answer packet[30] = 0
+answer packet[31] = 0
+answer packet[32] = c
+answer packet[33] = 9
+answer packet[34] = 58
+answer packet[35] = 13
+answer packet[36] = 7f
+answer packet[37] = 1
+answer packet[38] = 31
+answer packet[39] = 0
+answer packet[40] = 0
+answer packet[41] = 0
+answer packet[42] = 0
+answer packet[43] = 5e
+answer packet[44] = cc
+answer packet[45] = 0
+answer packet[46] = 0
+answer packet[47] = 0
+answer packet[48] = 0
+answer packet[49] = 0
+answer packet[50] = 0
+answer packet[51] = 5
+answer packet[52] = 2f
+test checksum IS 52f, SHOULD BE 52f
+Reader data
+data 0 = 108
+data 1 = 840
+data 2 = f
+data 3 = 0
+data 4 = 143a
+data 5 = 1
+data 6 = 0
+data 7 = 0
+data 8 = 0
+data 9 = 0
+data 10 = 0
+data 11 = c
+data 12 = 958
+data 13 = 137f
+data 14 = 131
+data 15 = 0
+data 16 = 0
+data 17 = 5ecc
+data 18 = 0
+data 19 = 0
+data 20 = 0
+Read registers:
+Register 0: 264
+Register 1: 2112
+Register 2: 15
+Register 3: 0
+Register 4: 5178
+Register 5: 1
+Register 6: 0
+Register 7: 0
+Register 8: 0
+Register 9: 0
+Register 10: 0
+Register 11: 12
+Register 12: 2392
+Register 13: 4991
+Register 14: 305
+Register 15: 0
+Register 16: 0
+Register 17: 24268
+Register 18: 0
+Register 19: 0
+Register 20: 0
+
+pi@RPi-Solar:~/Desktop/PowerComCode $

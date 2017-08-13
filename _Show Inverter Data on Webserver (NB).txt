@@ -1,0 +1,269 @@
+Login to Pi@192.168.42.27
+UN Pi
+PW Raspberry
+
+Main files for powercom logger are in the folder /home/pi/Desktop/PowerComCode
+Main files for web are in the folder /home/pi/Desktop/PowerComCode/web
+
+cd ~/Desktop/PowerComCode/web
+
+SAMBA
+Make folder accessible
+	chown -R root:users /home/pi/Desktop/PowerComCode/web
+	chmod -R ug+rwx,o+rx-w /home/pi/Desktop/PowerComCode/web
+
+At the end of the file /etc/samba/smb.conf add the following lines:
+	sudo nano /etc/samba/smb.conf
+
+	[pi]
+	   path = /home/pi/Desktop/PowerComCode/web
+	   force group = users
+	   create mask = 0660
+	   directory mask = 0771
+	   browsable =yes
+	   writable = yes
+	   guest ok = yes
+
+
+Web server
+Source: https://iotbytes.wordpress.com/python-flask-web-application-on-raspberry-pi-with-nginx-and-uwsgi/
+
+1. Update and Upgrade Raspberry Pi packages:
+	sudo apt-get update
+	sudo apt-get upgrade
+
+2. Install NGINX:
+	sudo apt-get install nginx
+	sudo service nginx start
+
+3. Install Flask:
+	sudo pip install flask
+
+4. Install uWSGI:
+	sudo apt-get install build-essential python-dev
+	sudo pip install uwsgi
+
+5. Create a simple Python Flask App:
+	mkdir /home/pi/sampleApp
+	sudo chown www-data /home/pi/sampleApp
+	sudo nano /home/pi/sampleApp/sample_app.py
+
+	Add following code to “sample_app.py” file –
+	   from flask import Flask
+	   first_app = Flask(__name__)
+
+	   @first_app.route("/")
+	   def first_function():
+	     return "<html><body><h1 style='color:red'>I am hosted on Raspberry Pi !!!</h1><h2>sample_app.py</h2></body></html>"
+
+	   if __name__ == "__main__":
+	     first_app.run(host='0.0.0.0')
+
+6. Test Flask App with Python and uWSGI:
+	Execute “sample_app.py” file with following command. 
+
+	python /home/pi/sampleApp/sample_app.py
+
+	If you don’t see any error type Raspberry Pi’s IP Address with port 5000 in your browser (http://x.x.x.x:5000/) and you should see 
+		“I am hosted on Raspberry Pi !!!” in red color.
+		"sample_app.py" in black
+	[WORKING]
+
+	After testing Flask app with Python, you may want to test it with uWSGI –
+
+	cd /home/pi/sampleApp/
+	uwsgi --socket 0.0.0.0:8000 --protocol=http -w sample_app:first_app
+
+	Now you can test your app using port 8000 with Raspberry Pi’s IP Address (http://x.x.x.x:8000/)
+	[WORKING]
+
+
+7. create uWSGI Initialisation File:
+	sudo nano /home/pi/sampleApp/uwsgi_config.ini
+
+	Add following code to “uwsgi_config.ini” file –
+	   [uwsgi]
+
+	   chdir = /home/pi/sampleApp
+	   module = sample_app:first_app
+
+	   master = true
+	   processes = 1
+	   threads = 2
+
+	   uid = www-data
+	   gid = www-data
+	   socket = /tmp/sample_app.sock
+	   chmod-socket = 664
+	   vacuum = true
+
+	   daemonize = /home/pi/sampleApp/uwsgi.log
+	   die-on-term = true
+
+
+8. Test uWSGI Initialisation File:
+	Execute following command –
+	uwsgi --ini /home/pi/sampleApp/uwsgi_config.ini
+
+
+	Open another session to Raspberry Pi and check if you have “sample_app.sock” file in “/tmp” directory –
+
+	ls /tmp/ |grep sample_app.sock
+
+	If you see “sample_app.sock” file in command output your configuration is correct.
+	[CORRECT]
+
+
+9. Configure uWSGI to Auto-Start after Reboot:
+	Edit “/etc/rc.local” file using following command –
+	   sudo nano /etc/rc.local
+
+	Add following command in this file before the line “exit 0” –
+	   /usr/local/bin/uwsgi --ini /home/pi/sampleApp/uwsgi_config.ini --uid www-data --gid www-data --daemonize /home/pi/sampleApp/uwsgi.log
+
+10. Configure NGINX to Redirect Web Traffic to uWSGI (Reverse Proxy):
+	Remove “default” file from “/etc/nginx/sites-enabled/” –
+	   sudo rm /etc/nginx/sites-enabled/default
+
+	Create a new file named as “sample_app_proxy” in “/etc/nginx/sites-available/” –
+	   sudo nano /etc/nginx/sites-available/sample_app_proxy
+
+	Add following configuration in “sample_app_proxy” file –
+	   server {
+	    listen 80;
+	    server_name localhost;
+
+#	    location / { try_files $uri @app; }
+#	    location @app {
+	    location / {
+	     include uwsgi_params;
+	     uwsgi_pass unix:/tmp/sample_app.sock;
+	    }
+	   }
+
+	Link “/etc/nginx/sites-available/sample_app_proxy” file to “/etc/nginx/sites-enabled” directory –
+	   sudo rm /etc/nginx/sites-enabled/sample_app_proxy
+	   sudo ln -s /etc/nginx/sites-available/sample_app_proxy /etc/nginx/sites-enabled
+
+	   sudo rm /etc/uwsgi/apps-available/uwsgi_config.ini
+	   sudo rm /etc/uwsgi/apps-enabled/uwsgi_config.ini
+	   sudo ln -s /home/pi/sampleApp/uwsgi_config.ini /etc/uwsgi/apps-available/uwsgi_config.ini
+	   sudo ln -s /etc/uwsgi/apps-available/uwsgi_config.ini /etc/uwsgi/apps-enabled/uwsgi_config.ini
+
+
+	Restart NGINX and UWSGI Services –
+	   sudo service nginx restart
+	   sudo service uwsgi restart
+
+	sudo /etc/init.d/nginx status 
+	sudo /etc/init.d/uwsgi status 
+
+
+
+#############################################################################################################
+#### serve webpages from /home/pi/Desktop/PowerComCode/web
+	sudo chown www-data /home/pi/Desktop/PowerComCode/web
+
+PowerCom_Chart
+	/		# ex 'Hello World'
+	/chart		# ex data on JS chart
+	/chartjs	# ex data on JS chart
+	/solar		# show daily data from inverter
+####
+####
+
+6. Test Flask App with Python and uWSGI:
+	Execute “PowerCom_Chart.py” file with following command. 
+	python /home/pi/Desktop/PowerComCode/web/PowerCom_Chart.py
+	[WORKING]
+
+	After testing Flask app with Python, you may want to test it with uWSGI –
+
+	cd /home/pi/Desktop/PowerComCode/web/
+	uwsgi --socket 0.0.0.0:8000 --protocol=http -w PowerCom_Chart:app
+
+	Now you can test your app using port 8000 with Raspberry Pi’s IP Address (http://x.x.x.x:8000/)
+	[WORKING]
+
+
+7. create uWSGI Initialisation File:
+	sudo nano /home/pi/Desktop/PowerComCode/web/uwsgi_config.ini
+
+	Add following code to “uwsgi_config.ini” file –
+	   [uwsgi]
+
+	   chdir = /home/pi/Desktop/PowerComCode/web/
+	   module = PowerCom_Chart:app
+
+	   master = true
+	   processes = 1
+	   threads = 2
+
+	   uid = www-data
+	   gid = www-data
+	   socket = /tmp/PowerCom_Chart.sock
+	   chmod-socket = 664
+	   vacuum = true
+
+	   die-on-term = true
+
+8. Test uWSGI Initialisation File:
+	Execute following command –
+	uwsgi --ini /home/pi/Desktop/PowerComCode/web/uwsgi_config.ini
+
+	Open another session to Raspberry Pi and check if you have “sample_app.sock” file in “/tmp” directory –
+	ls /tmp/ |grep PowerCom_Chart.sock
+
+	If you see “PowerCom_Chart.sock” file in command output your configuration is correct.
+	[CORRECT]
+
+
+9. Configure uWSGI to Auto-Start after Reboot:
+	Edit “/etc/rc.local” file using following command –
+	   sudo nano /etc/rc.local
+
+	Add following command in this file before the line “exit 0” –
+	   /usr/local/bin/uwsgi --ini /home/pi/Desktop/PowerComCode/web/uwsgi_config.ini --uid www-data --gid www-data --daemonize /var/log/uwsgi.log
+	   /usr/local/bin/uwsgi --ini /home/pi/Desktop/PowerComCode/web/uwsgi_config.ini --uid www-data --gid www-data --daemonize /home/pi/Desktop/PowerComCode/web/uwsgi.log
+
+
+10. Configure NGINX to Redirect Web Traffic to uWSGI (Reverse Proxy):
+	Remove “default” file from “/etc/nginx/sites-enabled/” –
+	   sudo rm /etc/nginx/sites-enabled/default
+
+	Create a new file named as “sample_app_proxy” in “/etc/nginx/sites-available/” –
+	   sudo nano /etc/nginx/sites-available/PowerCom_Chart_proxy
+
+	Add following configuration in “PowerCom_Chart_proxy” file –
+	   server {
+	    listen 80;
+	    server_name PowerCom_Chart;
+
+#	    location / { try_files $uri @app; }
+#	    location @app {
+	    location / {
+	     include uwsgi_params;
+	     uwsgi_pass unix:/tmp/PowerCom_Chart.sock;
+	    }
+	   }
+
+	Link “/etc/nginx/sites-available/PowerCom_Chart_proxy” file to “/etc/nginx/sites-enabled” directory –
+	   sudo rm /etc/nginx/sites-enabled/PowerCom_Chart_proxy
+	   sudo ln -s /etc/nginx/sites-available/PowerCom_Chart_proxy /etc/nginx/sites-enabled
+
+	Test for syntax errors
+	  sudo nginx -t
+
+
+	   sudo rm /etc/uwsgi/apps-available/uwsgi_config.ini
+	   sudo ln -s /home/pi/Desktop/PowerComCode/web/uwsgi_config.ini /etc/uwsgi/apps-available/uwsgi_config.ini
+	   sudo rm /etc/uwsgi/apps-enabled/uwsgi_config.ini
+	   sudo ln -s /etc/uwsgi/apps-available/uwsgi_config.ini /etc/uwsgi/apps-enabled/uwsgi_config.ini
+
+	Restart NGINX and UWSGI Services –
+	   sudo service nginx restart
+	   sudo service uwsgi restart
+
+	sudo /etc/init.d/nginx status 
+	sudo /etc/init.d/uwsgi status 
+

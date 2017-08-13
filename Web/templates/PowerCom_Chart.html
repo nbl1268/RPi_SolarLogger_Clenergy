@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>   
+  <meta charset="utf-8" />   
+   <title>Solar Inverter {{title}} Data</title>      
+
+   <!-- import plugin script -->   
+   <script type='application/javascript'  src='static/raphael-2.1.0.min.js'></script>
+   <script type='application/javascript'  src='static/jquery-1.8.2.min.js'></script>
+   <script type='application/javascript'  src='static/morris-0.5.1.min.js'></script>
+   <meta charset=utf-8 />
+
+   <script type='application/javascript'>
+   var reloading;
+   var reloadtime = 60000;
+   var sTitle =  document.title;
+
+   function get_radio_value() {
+     var inputs = document.getElementsByName("reload");
+     for (var i = 0; i < inputs.length; i++) {
+       if (inputs[i].checked) {
+         return inputs[i].value;
+       }
+     }
+   }
+
+   function SetReloadTime() {
+     reloadtime = get_radio_value() * 60000;
+     if (isNaN(reloadtime)) {
+     // force default
+     SetDefaultRadioButton();
+     }
+   }
+
+   function SetDefaultRadioButton() {
+     switch(document.title) {
+       case 'Solar Inverter Current Day Data':
+         document.getElementById('radio_10').checked = true;
+         break;
+
+       case 'Solar Inverter Daily Data':
+         document.getElementById('radio_30').checked = true;
+         break;
+
+       case 'Solar Inverter Monthly Data':
+         document.getElementById('radio_60').checked = true;
+         break;
+
+       default:
+       document.getElementById('radio_30').checked = true;
+    }
+   }
+
+   function SetAutoRefresh() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     var autoReload = document.getElementById("reloadCB").checked;
+     if (autoReload) {
+       window.location.replace("#autoreload");
+       reloading=setTimeout("window.location.reload();", reloadtime);
+     } else {
+       window.location.replace("#");
+       clearTimeout(reloading);
+     }
+   }
+
+   function checkReloading() {
+     clearTimeout(reloading);
+     SetReloadTime();
+     if (window.location.hash=="#autoreload") {
+       reloading=setTimeout("window.location.reload();", reloadtime);
+       document.getElementById("reloadCB").checked=true;
+     }
+   }
+
+   window.onload=checkReloading;
+
+   </script>
+   <link rel="icon" type="image/png" href="/static/images/favicon.png">
+ </head>
+
+ <body>
+   <h1>Solar Inverter {{title}} Data</h1>
+   Readings <a href="/solar">Now</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Charts <a href="/solar_day">Today</a>&nbsp;&nbsp;&nbsp;<a href="/solar_daily">Daily</a>&nbsp;&nbsp;&nbsp;<a href="/solar_monthly">Monthly</a>
+   <BR>
+
+   <!-- // show the charts if there is data -->
+   {% if (labels) %}
+     <div id="MorrisBarChart"></div>
+     <div id="MorrisLineChart"></div>
+   {% else %}
+     <h1>No Data Found !!</h1>
+   {% endif %}
+
+   <script type="text/javascript">
+     //Set the cursor ASAP to "Wait"
+     document.body.style.cursor='wait';
+
+     try {
+       // Global values
+       if (typeof labels)
+       {
+         var steps = 5;	// spacing of vetical graduations
+         var arr_label = [{% for item in labels %}
+                 "{{item}}",
+                 {% endfor %}];
+         var arr_value = [{% for item in values %}
+                  {{item}},
+                 {% endfor %}];
+         var max = 100;	// default vertical max
+         // get max value from data
+         max = Math.max.apply(null,arr_value);
+         var count = arr_value.length;
+
+         // DATA for MORRIS CHARTS
+         // construct of data object e.g. name:value pairs
+         // { yLabel: 'yValue', xLabel: xValue, etc }
+         var MC_data = [];
+         for (var i=0; i<arr_label.length && i<arr_value.length; i++)
+           {
+             MC_data.push({ y: arr_label[i], x: arr_value[i]});
+           }
+
+         // Set X Units text
+         var xUnits = "";
+         switch(document.title) {
+           case 'Solar Inverter Current Day Data':
+             xUnits = "Watts";
+             break;
+
+           case 'Solar Inverter Daily Data':
+             xUnits = "Kilowatts";
+             break;
+
+           case 'Solar Inverter Monthly Data':
+             xUnits = "Kilowatts";
+             break;
+
+           default:
+             xUnits = "Watts";
+         }
+
+         // MORRIS CHARTS
+         var config = {
+           data: MC_data,
+           xkey: 'y',
+           ykeys: ['x'],
+           labels: [xUnits],
+           fillOpacity: 0.6,
+           hideHover: 'auto',
+           behaveLikeLine: true,
+           resize: true,
+           ymax: 'auto',
+           gridIntegers: true,
+           pointFillColors:['#ffffff'],
+           pointStrokeColors: ['black'],
+           lineColors:['gray']
+         };
+
+         config.element = 'MorrisBarChart';
+         Morris.Bar(config);
+         config.element = 'MorrisLineChart';
+         Morris.Line(config);
+       }
+     }
+
+   /// show data in table
+//   var myArray = arr_label
+//   var myTable= "<table><tr><td style='width: 100px; color: red;'>ID#</td>";
+//     myTable+= "<td style='width: 100px; color: red; text-align: right;'>Date</td>";
+//     myTable+="<td style='width: 100px; color: red; text-align: right;'>Value</td></tr>";
+//
+//     myTable+="<tr><td style='width: 100px;                   '>---------------</td>";
+//     myTable+="<td     style='width: 100px; text-align: right;'>---------------</td>";
+//     myTable+="<td     style='width: 100px; text-align: right;'>---------------</td></tr>";
+//
+//   for (var i=0; i<count; i++) {
+//    myTable+="<tr><td style='width: 100px;'>Reading " + i + " is:</td>";
+//    myArray[i] = arr_label[i].toString();
+//    myTable+="<td style='width: 100px; text-align: right;'>" + arr_label[i] + "</td>";
+//    myTable+="<td style='width: 100px; text-align: right;'>" + arr_value[i] + "</td></tr>";
+//   }  
+//   myTable+="</table>";
+//   document.write( myTable);
+
+     catch(err) {
+       //message.innerHTML = "Input " + err;
+     }
+
+     finally {
+       document.body.style.cursor='default';
+     }
+
+   </script>
+   <br>
+   <form id="AutoRefresh_select" onclick="SetAutoRefresh(this);">  
+     Auto Refresh: 
+     <input type="checkbox" onclick="SetAutoRefresh(this);" id="reloadCB">
+     Interval: 
+     <input type="radio" name="reload" value="1"  id="radio_1" /> <label for="radio_1" >1 min</label>
+     <input type="radio" name="reload" value="5"  id="radio_5" /> <label for="radio_5" >5 min</label>
+     <input type="radio" name="reload" value="10" id="radio_10" /><label for="radio_10">10 min</label>
+     <input type="radio" name="reload" value="20" id="radio_20" /><label for="radio_20">20 min</label>
+     <input type="radio" name="reload" value="30" id="radio_30" /><label for="radio_30">30 min</label>
+     <input type="radio" name="reload" value="60" id="radio_60" /><label for="radio_60">1 hour</label>
+   </form>
+
+   Page Last Updated: <span id="loadTime"></span>
+   <script type='application/javascript'>
+     document.getElementById('loadTime').innerHTML = new Date().toLocaleString();
+   </script>
+
+ </body>
+</html>
+

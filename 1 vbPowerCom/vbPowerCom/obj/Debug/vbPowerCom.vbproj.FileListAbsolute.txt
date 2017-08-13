@@ -1,0 +1,11 @@
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.vbproj.GenerateResource.Cache
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\bin\Debug\vbPowerCom.exe.config
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\bin\Debug\vbPowerCom.exe
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\bin\Debug\vbPowerCom.pdb
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\bin\Debug\vbPowerCom.xml
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.frmMain.resources
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.Resources.resources
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.exe
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.xml
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.pdb
+C:\Projects\Project-RPiSolarMonitor\vbPowerCom\vbPowerCom\obj\Debug\vbPowerCom.vbprojResolveAssemblyReference.cache
